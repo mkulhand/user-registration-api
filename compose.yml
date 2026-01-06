@@ -1,0 +1,43 @@
+services:
+  api:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - database
+    networks:
+      - user-registration-network
+    restart: unless-stopped
+  database:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: ${DB_LOGIN}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db_storage:/var/lib/postgresql/data
+    networks:
+      - user-registration-network
+    restart: unless-stopped
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${DB_MAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    networks:
+      - user-registration-network
+    restart: unless-stopped
+
+networks:
+  user-registration-network:
+    driver: bridge
+    name: user-registration-network
