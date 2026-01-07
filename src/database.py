@@ -44,6 +44,16 @@ CREATE TABLE IF NOT EXISTS users (
     activated   BOOLEAN             NOT NULL DEFAULT FALSE,
     created_at  TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS activation_code (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    code VARCHAR(4) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
 """
         )
         conn.commit()
