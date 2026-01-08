@@ -56,9 +56,13 @@ PgAdmin (optional) : `http://localhost:5050`
 ```
 
 **models** : Data validation and parsing
+
 **repositories** : Database interactions (queries & transactions)
+
 **routers** : API endpoint definitions and request/response handling
+
 **services** : Application services (authentication, mail adapter, database handler)
+
 **use_cases** : Business logic handlers
 
 ## Implementation details
