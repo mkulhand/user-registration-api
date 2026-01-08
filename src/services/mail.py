@@ -22,7 +22,7 @@ class InMemoryMailAdapter(EmailAdapter):
         user_data = user.to_snapshot()
         self.mails[user_data.get("email")] = {
             "type": "activation_code",
-            "code": user_data.get("activationCode"),
+            "code": user_data.get("activation_code"),
         }
 
     def has_activation_code_mail(self, email: str, code: str) -> bool:
@@ -35,7 +35,11 @@ class ConsoleEmailAdapter(EmailAdapter):
     def send_activation_code(self, user: User) -> None:
         user_data = user.to_snapshot()
         print(
-            f'📧 Sending activation code to {user_data.get("email")}: {user_data.get("activationCode")}'
+            f"""
+############################################################################################
+📧 Sending activation code to {user_data.get("email")}: {user_data.get("activation_code")}
+############################################################################################
+"""
         )
 
 
@@ -53,7 +57,7 @@ class HttpEmailAdapter(EmailAdapter):
         payload = {
             "to": user_data.get("email"),
             "subject": "Activation Code",
-            "body": f'Your code: {user_data.get("activationCode")}',
+            "body": f'Your code: {user_data.get("activation_code")}',
         }
         data = json.dumps(payload).encode("utf-8")
         headers = {

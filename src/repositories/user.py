@@ -29,7 +29,7 @@ class UserRepository(ABC):
 
 class InMemoryUserRepository(UserRepository):
     users: dict
-    last_id: int
+    __last_id: int
     __activation_code_repository: ActivationCodeRepository
 
     def __init__(
@@ -37,18 +37,18 @@ class InMemoryUserRepository(UserRepository):
         activation_code_repository: ActivationCodeRepository,
     ):
         self.users = {}
-        self.last_id = 0
+        self.__last_id = 1
         self.__activation_code_repository = activation_code_repository
 
     def save_user(self, user: User) -> User:
         user_data = user.to_snapshot()
         if user_data.get("email") in self.users:
             raise DuplicateEmailError()
-        self.last_id += 1
-        user_data["id"] = self.last_id
-        user.register(UserId(self.last_id))
+        user_data["id"] = self.__last_id
+        user.register(UserId(self.__last_id))
         self.users[user_data.get("email")] = user_data
         self.__activation_code_repository.save_activation_code(user)
+        self.__incr_id()
 
         return User
 
@@ -72,6 +72,12 @@ class InMemoryUserRepository(UserRepository):
 
     def activate(self, email: str) -> None:
         self.users[email]["activated"] = True
+
+    def save_inactive_user(self, user_data: dict):
+        self.users[user_data.get("email")] = user_data
+
+    def __incr_id(self):
+        self.__last_id += 1
 
 
 class DatabaseUserRepository(UserRepository):
@@ -99,8 +105,7 @@ RETURNING id
                     (user_data.get("email"), user_data.get("password")),
                 )
 
-                user_id = UserId(cursor.fetchone()[0])
-                user.register(user_id)
+                user.register(UserId(cursor.fetchone()[0]))
                 self.__activation_code_repository.save_activation_code(user)
 
                 return user

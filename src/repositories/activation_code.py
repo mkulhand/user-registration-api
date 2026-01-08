@@ -23,11 +23,13 @@ class ActivationCodeRepository(ABC):
 class InMemoryActivationCodeRepository(ActivationCodeRepository):
     activation_codes: dict
 
-    def save_activation_code(self, user: User) -> None:
+    def __init__(self):
         self.activation_codes = {}
+
+    def save_activation_code(self, user: User) -> None:
         user_data = user.to_snapshot()
         self.activation_codes[user_data.get("id")] = {
-            "activationCode": user_data.get("activationCode"),
+            "activation_code": user_data.get("activation_code"),
             "created_at": datetime.now(timezone.utc),
         }
 
@@ -35,7 +37,7 @@ class InMemoryActivationCodeRepository(ActivationCodeRepository):
         data = self.activation_codes.get(user_id)
         one_minute_ago = datetime.now(timezone.utc) - timedelta(minutes=1)
 
-        if not data or data["activationCode"] != code:
+        if not data or data["activation_code"] != code:
             raise InvalidActivationCode()
         if data["created_at"] < one_minute_ago:
             raise CodeExpired()
@@ -44,6 +46,12 @@ class InMemoryActivationCodeRepository(ActivationCodeRepository):
         self.activation_codes[user_id]["created_at"] = datetime.now(
             timezone.utc
         ) - timedelta(hours=1)
+
+    def save_fake_activation_code(self, user_id: int, code: str) -> None:
+        self.activation_codes[user_id] = {
+            "activation_code": code,
+            "created_at": datetime.now(timezone.utc),
+        }
 
 
 class DatabaseActivationCodeRepository(ActivationCodeRepository):
@@ -61,7 +69,7 @@ INSERT INTO activation_code (user_id, code)
 VALUES (%s, %s)
 RETURNING id
 """,
-                (user_data.get("id"), user_data.get("activationCode")),
+                (user_data.get("id"), user_data.get("activation_code")),
             )
             return cursor.fetchone()[0]
 

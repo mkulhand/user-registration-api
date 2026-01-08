@@ -5,7 +5,7 @@ class User:
     __id: UserId | None
     __email: Email
     __password: Password
-    __activationCode: ActivationCode
+    __activation_code: ActivationCode
 
     def __init__(
         self,
@@ -16,7 +16,7 @@ class User:
         self.__id = id
         self.__email = email
         self.__password = password
-        self.__activationCode = ActivationCode()
+        self.__activation_code = ActivationCode()
 
     def register(self, id: UserId) -> "User":
         self.__id = id
@@ -28,5 +28,5 @@ class User:
             "id": self.__id.to_snapshot() if self.__id else None,
             "email": self.__email.to_snapshot(),
             "password": self.__password.to_snapshot(),
-            "activationCode": self.__activationCode.to_snapshot(),
+            "activation_code": self.__activation_code.to_snapshot(),
         }

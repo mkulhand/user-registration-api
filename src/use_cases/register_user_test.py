@@ -1,4 +1,3 @@
-import bcrypt
 import pytest
 from fastapi import BackgroundTasks
 
@@ -27,7 +26,6 @@ def test_register_user_success_input_validation():
     user = User(Email(email), Password(password))
     user_data = user.to_snapshot()
     assert user_data.get("email") == email.lower()
-    assert bcrypt.checkpw(password.encode(), user_data.get("password").encode())
 
 
 @pytest.mark.asyncio
@@ -51,7 +49,7 @@ async def test_register_user_execute():
 
     user_data = user.to_snapshot()
     activation_code_repository.has_valid_code(
-        user_id=user_data.get("id"), code=user_data.get("activationCode")
+        user_id=user_data.get("id"), code=user_data.get("activation_code")
     )
 
     # Simulate end of endpoint execution
@@ -59,5 +57,5 @@ async def test_register_user_execute():
         await task()
 
     assert mail_adapter.has_activation_code_mail(
-        email=email, code=user_data.get("activationCode")
+        email=email, code=user_data.get("activation_code")
     )

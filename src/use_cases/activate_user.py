@@ -1,6 +1,5 @@
 from fastapi import Depends
 
-from src.models import User
 from src.repositories import (
     ActivationCodeRepository,
     UserRepository,

@@ -94,7 +94,7 @@ def mock_activate_dependencies():
     app.dependency_overrides.update(overrides)
 
     user_data = user.to_snapshot()
-    yield email, password, user_data.get("activationCode")
+    yield email, password, user_data.get("activation_code")
 
     app.dependency_overrides.clear()
 
