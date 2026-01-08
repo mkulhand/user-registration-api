@@ -9,7 +9,9 @@ docker logs user_registration_api -n 200 -f
 ```
 
 API : `http://localhost:8000/api`
+
 Documentation : `http://localhost:8000/docs`
+
 PgAdmin (optional) : `http://localhost:5050`
 
 **Test the routes**
