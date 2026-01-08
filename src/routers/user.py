@@ -16,7 +16,7 @@ from src.use_cases.register_user import RegisterUser, get_register_user_use_case
 router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.post("")
+@router.post("/", status_code=201)
 def create_user(
     email: str = Body(...),
     password: str = Body(...),
@@ -33,7 +33,7 @@ def create_user(
     return Response("User created", 201)
 
 
-@router.post("/activate")
+@router.post("/activate", status_code=200)
 def activate(
     code: str = Body(..., embed=True),
     user: dict = Depends(auth.get_inactive_user),
