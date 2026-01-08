@@ -39,7 +39,8 @@ class ConsoleEmailAdapter(EmailAdapter):
 ############################################################################################
 📧 Sending activation code to {user_data.get("email")}: {user_data.get("activation_code")}
 ############################################################################################
-"""
+""",
+            flush=True,
         )
 
 

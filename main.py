@@ -1,10 +1,16 @@
 from fastapi import APIRouter, FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 app = FastAPI(
     title="User Registration API",
     openapi_url="/openapi.json",
 )
+
+
+@app.get("/")
+def hosted_page():
+    return FileResponse("index.html", media_type="text/html")
+
 
 api_router = APIRouter(prefix="/api")
 
