@@ -6,11 +6,9 @@ from psycopg import Connection
 DB_LOGIN = os.getenv("DB_LOGIN")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
+# Connection pool instead of atomic for a more prod-ready setup.
 pool = psycopg_pool.ConnectionPool(
-    conninfo=os.getenv("DB_URL"),
-    min_size=4,
-    max_size=20,
-    timeout=30,
+    conninfo=os.getenv("DB_URL"), min_size=4, max_size=20, timeout=30, open=True
 )
 
 
@@ -26,14 +24,14 @@ def get_db():
         pool.putconn(conn)
 
 
-def check_db_connection(conn: Connection):
+def _check_db_connection(conn: Connection):
     with conn.cursor() as cur:
         cur.execute("SELECT version();")
         version = cur.fetchone()
         print("PostgreSQL version:", version[0])
 
 
-def initialize_db(conn: Connection):
+def _initialize_db(conn: Connection):
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -61,10 +59,9 @@ CREATE TABLE IF NOT EXISTS activation_code (
 
 conn = pool.getconn()
 try:
-    check_db_connection(conn)
-    initialize_db(conn)
-except Exception as e:
-    print(e)
+    _check_db_connection(conn)
+    _initialize_db(conn)
+except:
     # Override Exception to avoid any secrets logged
     raise Exception("Error initializing database")
 finally:

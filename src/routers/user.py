@@ -1,16 +1,17 @@
 from fastapi import APIRouter, Body, Depends, Response
 from fastapi.exceptions import HTTPException
 
-from src.database import get_db
-from src.models import (
-    ActivationCodeError,
-    ActivationCodeMailError,
-    User,
-    ValidationError,
+from src.models import User
+from src.models.exceptions import ValidationError
+from src.models.value_objects import Email, Password
+from src.repositories.exceptions import (
+    CodeExpired,
+    DuplicateEmailError,
+    InvalidActivationCode,
 )
-from src.repository import DuplicateEmailError
 from src.services import auth
-from src.services.mail import EmailAdapter, get_email_adapter
+from src.use_cases.activate_user import ActivateUser, get_activate_user_use_case
+from src.use_cases.register_user import RegisterUser, get_register_user_use_case
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -19,20 +20,15 @@ router = APIRouter(prefix="/user", tags=["user"])
 def create_user(
     email: str = Body(...),
     password: str = Body(...),
-    conn=Depends(get_db),
-    mail_adapter: EmailAdapter = Depends(get_email_adapter),
+    register_user: RegisterUser = Depends(get_register_user_use_case),
 ):
-    user = User(conn=conn, email=email, password=password)
-
     try:
-        user.register()
-        user.send_activation_code(mail_adapter)
+        user = User(email=Email(email), password=Password(password))
+        register_user.execute(user)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.infos)
     except DuplicateEmailError as e:
         raise HTTPException(409, e.detail)
-    except ActivationCodeMailError as e:
-        raise HTTPException(502, e.detail)
 
     return Response("User created", 201)
 
@@ -40,12 +36,11 @@ def create_user(
 @router.post("/activate")
 def activate(
     code: str = Body(..., embed=True),
-    user: User = Depends(auth.get_authenticated_user),
+    user: dict = Depends(auth.get_inactive_user),
+    activate_user: ActivateUser = Depends(get_activate_user_use_case),
 ):
-    if user.activated:
-        raise HTTPException(409, "User is already activated")
     try:
-        user.activate(code)
-    except ActivationCodeError as e:
+        activate_user.execute(user.get("id"), code)
+    except (CodeExpired, InvalidActivationCode) as e:
         raise HTTPException(409, e.detail)
-    return user.id
+    return Response("User activated", 200)
