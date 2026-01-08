@@ -93,3 +93,5 @@ There are a few points I wasn't sure if in scope or not, namely:
 - rate limit
 - activation code table cleanup
 - password hashing (I used `bcrypt` package)
+
+Also, for sake of simplicity, my router integration tests do not mock use case execution (as they should in a real project).

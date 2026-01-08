@@ -1,3 +1,8 @@
+"""
+Note:
+On a real prod case, those router integration tests should also mock use case execution to focus solely on router logic.
+"""
+
 import base64
 
 import pytest
